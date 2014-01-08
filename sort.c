@@ -1,3 +1,8 @@
+/* Simple example program demonstrating the use of the bitarray data structure.
+   This program will read a list of numbers and then sort them.  It creates
+   a bitarray of size equal to the range of numbers in the input, and sets the
+   bits corresponding to each number. */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -53,23 +58,23 @@ struct numbers *read_numbers(FILE *fp, size_t max)
 
 int main(int argc, char *argv[])
 {
-    struct numbers *nums;
+    struct numbers *nums = NULL;
     const char *filename = "num.dat";
     const char *ofilename = "num.out";
-    FILE *fp;
-    FILE *ofp;
+    FILE *fp = NULL;
+    FILE *ofp = NULL;
     int ret = EXIT_FAILURE;
     size_t i;
     size_t range;
     size_t index;
-    bitarray *barray;
+    bitarray *barray = NULL;
 
     if (argc > 1) {
         filename = argv[1];
     }
     if ((fp = fopen(filename, "r")) == NULL) {
         perror(filename);
-        goto fail0;
+        goto done;
     }
 
     if (argc > 2) {
@@ -77,18 +82,18 @@ int main(int argc, char *argv[])
     }
     if ((ofp = fopen(ofilename, "w")) == NULL) {
         perror(ofilename);
-        goto fail1;
+        goto done;
     }
 
     if ((nums = read_numbers(fp, MAX)) == NULL) {
         perror("read_numbers");
-        goto fail2;
+        goto done;
     }
 
     range = nums->max - nums->min + 1;
     if ((barray = bitarray_init(range)) == NULL) {
         perror("bitarray_init");
-        goto fail3;
+        goto done;
     }
 
     for (i=0; i < nums->len; ++i) {
@@ -102,20 +107,25 @@ int main(int argc, char *argv[])
         }
         ++index;
     }
+    ret = EXIT_SUCCESS;
 
-fail4:
-    bitarray_free(barray);
+done:
+    if (barray) {
+        bitarray_free(barray);
+    }
 
-fail3:
-    free(nums->n);
-    free(nums);
+    if (nums) {
+        free(nums->n);
+        free(nums);
+    }
 
-fail2:
-    fclose(ofp);
+    if (ofp) {
+        fclose(ofp);
+    }
 
-fail1:
-    fclose(fp);
+    if (fp) {
+        fclose(fp);
+    }
 
-fail0:
     return ret;
 }

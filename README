@@ -1,0 +1,2 @@
+A simple bit array structure in C.  Only a few methods are defined, but it
+should be easy to add more methods such as shifting, rotation, etc.
